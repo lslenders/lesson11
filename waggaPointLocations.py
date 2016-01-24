@@ -1,9 +1,10 @@
-from spatialRefSyst import *
+from functions import *
 from osgeo import ogr, osr
 import os, os.path
 
 #set working directory
-os.chdir('/home/jasondavis/Wageningen/geoscripting/lesson11/data')
+os.getcwd()
+os.chdir(str(os.getcwd()+'/data'))
 
 ##Add spatial reference system
 spatialReference = applySpatialRefSystem(4326)
@@ -81,25 +82,28 @@ rule.symbols.append(symbolizer)
 style = mapnik.Style()
 style.rules.append(rule)
 
+# File with symbol for point
+file_symbol=os.path.join("figs","fig_start.png")
+
 #3) Adding style to map, "mapStyle" is a simple name for our style
 #Later we will define that our layer uses this style that is stored on the maps object
 map.append_style("mapStyle", style)
 
 #4) Adding the data first step is creating a layer, a map has mutiple layers
-layer = mapnik.Layer("mapLayer")
-layer.datasource = mapnik.Shapefile(file=os.path.join("data",
-                                        "world_borders.shp"))
-layer.styles.append("mapStyle")
+layerPoly = mapnik.Layer("mapLayer")
+layerPoly.datasource = mapnik.Shapefile(file=os.path.join("ne_110m_land.shp"))
 
-#map.append_style("mapStyle", style)
+layerPoly.styles.append("mapStyle")
+
+# Set boundaries for the Netherlands
+boundsLL = (8 , 45, 7, 54.5) #(minx, miny, maxx,maxy)
+map.zoom_to_box(mapnik.Box2d(*boundsLL)) # zoom to bbox
 
 #5) The current layer is not yet associated to the map 
-map.layers.append(layer)
+map.layers.append(layerPoly)
 
-#6) Zoom to full extend of layers and dump content
-map.zoom_all()
-mapnik.render_to_file(map, os.path.join("figs",
-                                        "map.png"), "png")
+mapnik.render_to_file(map, "map.png", "png")
+
 print "All done - check content"
 
 
